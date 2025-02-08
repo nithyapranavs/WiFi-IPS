@@ -1,0 +1,24 @@
+{% extends 'main/index.html' %} 
+
+{% block title %} clients_connected {% endblock %} 
+
+{% block additional_content %}
+    <h1>Clients Connected</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>SSID</th>
+                <th>MAC</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+                <tr>
+                    <td>{{ row.0}}</td>
+                    <td>{{ row.1}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -1,0 +1,5 @@
+[attack]
+deauth = true
+mitm = true
+capture_handshake = true
+dos_attack = true

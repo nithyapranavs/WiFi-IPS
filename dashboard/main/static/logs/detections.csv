@@ -1,0 +1,7 @@
+Timestamp,Attack Type
+2024-07-15 10:15:30.123456,Detected port scan
+2024-07-15 10:16:45.234567,Blocked suspicious connection
+2024-07-14 12:45:20.567890,Unusual traffic pattern detected
+2024-07-15 10:17:55.345678,SSID channel rotation performed
+2024-07-14 12:30:15.456789,Firewall update applied
+2024-08-10 12:30:15.456789,SSID channel rotation performed

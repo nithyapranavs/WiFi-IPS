@@ -1,0 +1,26 @@
+{% extends 'main/index.html' %} 
+{% load static %}
+
+{% block title %} Prevention {% endblock %} 
+
+{% block additional_content %}
+<link rel="stylesheet" href="{% static 'mystyle.css' %}">
+    <h1>Prevention</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Time stamp</th>
+                <th>Action type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in table_data %}
+                <tr>
+                    <td>{{ row.0}}</td>
+                    <td>{{ row.1}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

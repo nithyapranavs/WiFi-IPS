@@ -1,0 +1,7 @@
+Timestamp,Action Type
+2024-07-15 09:30:00.123456,Started mitigation process
+2024-07-15 09:35:10.234567,Applied firewall rule update
+2024-07-15 09:40:20.345678,Blocked suspicious traffic
+2024-07-15 09:45:30.456789,Failed to block IP due to timeout
+2024-07-14 10:00:00.567890,Started scanning for vulnerabilities
+2024-07-14 10:10:00.678901,Detected unusual pattern in network traffic
