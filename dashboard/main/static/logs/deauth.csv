@@ -1,0 +1,4 @@
+timestamp,router,victim,signalStrength,channelFlags,packetLength,type
+1710001234,20:4e:7f:0e:df:46,a4:5e:60:1f:23:89,-45,0x00,28,7
+1710001256,20:4e:7f:0e:df:46,b2:7a:93:2d:56:ab,-50,0x01,28,3
+1710001289,20:4e:7f:0e:df:46,d8:61:7e:45:12:34,-60,0x00,28,1

@@ -19,21 +19,49 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Timestamp</th>
-            <th>Attack Id</th>
-            <th>Source IP</th>
-            <th>Destination IP</th>
-            <th>Severity</th>
+            {% if selected_attack == 'deauth' %}
+                <th>Timestamp</th>
+                <th>Router</th>
+                <th>Victim</th>
+                <th>Signal Strength</th>
+                <th>Channel Flags</th>
+                <th>Packet Length</th>
+                <th>Type</th>
+            {% elif selected_attack == 'rogue_ap' %}
+                <th>Timestamp</th>
+                <th>SSID</th>
+                <th>BSSID</th>
+                <th>Signal Strength</th>
+                <th>Channel</th>
+                <th>Supported Rates</th>
+            {% else %}
+                <th>Timestamp</th>
+                <th>Attack Id</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Severity</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
         {% for log in logs %}
         <tr>
-            <td>{{ log.0 }}</td>
-            <td>{{ log.1 }}</td>
-            <td>{{ log.2 }}</td>
-            <td>{{ log.3 }}</td>
-            <td>{{ log.4 }}</td>
+            {% if selected_attack == 'deauth' %}
+                <td>{{ log.0}}</td>
+                <td>{{ log.1}}</td>
+                <td>{{ log.2}}</td>
+                <td>{{ log.3}}</td>
+                <td>{{ log.4}}</td>
+                <td>{{ log.5}}</td>
+                <td>{{ log.6}}</td>
+            {% elif selected_attack == 'rogue_ap' %}
+                <td>{{ log.0}}</td>
+                <td>{{ log.1}}</td>
+                <td>{{ log.2}}</td>
+                <td>{{ log.3}}</td>
+                <td>{{ log.4}}</td>
+                <td>{{ log.5}}</td>
+            {% endif %}
         </tr>
         {% endfor %}
     </tbody>

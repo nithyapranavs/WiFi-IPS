@@ -11,6 +11,24 @@ import hashlib
 USERNAME = "admin"
 PASSWORD = '21232f297a57a5a743894a0e4a801fc3'
 
+# --- toggle preventions ---
+def set_deauth(status):
+    value = 1 if status == 1 else 0
+    hostapd_config_file = "/etc/hostapd/hostapd.conf"
+    lines = []
+
+    with open(hostapd_config_file, 'r') as file:
+        for line in file:
+            if line.startswith('ieee80211w='):
+                lines.append(f'ieee80211w={value}\n')
+            else:
+                lines.append(line)
+
+    with open(hostapd_config_file, 'w') as file:
+        file.writelines(lines)
+
+# --- end of toggles
+
 # Create your views here.
 def login_view(request):
     if request.method == 'POST':
@@ -32,77 +50,50 @@ def logout_view(request):
 
 def settings(request):
     config = toml.load("main/static/config/prevent.toml")
-    attacks = [
+    '''attacks = [
         'deauth',
         'mitm', 
         'capture_handshake',
         'dos_attack'
-    ]
+    ]'''
+    attacks = ['deauth']
     
     items = [[attack, config['attack'][attack]] for attack in attacks]
-
-    whitelist = helper.get_mac("main/static/config/whitelist.txt")
-    blacklist = helper.get_mac("main/static/config/blacklist.txt")
-    print(whitelist, blacklist)
-
-    context = {
-        'items': items,
-        'whitelist': whitelist,
-        'blacklist': blacklist
+    context = {'items': items}
+    attack_toggle = {
+        'deauth': set_deauth,
     }
+
     if request.method == 'POST':
         if 'toggle' in request.POST:
             item_name = request.POST.get('toggle')
             # Toggle the item's status
             for item in items:
                 if item[0] == item_name:
-                    config['attack'][item_name] = not config['attack'][item_name]
+                    new_status = not config['attack'][item_name]
+                    config['attack'][item_name] = new_status
                     with open('main/static/config/prevent.toml', 'w') as config_file:
                         toml.dump(config, config_file)
+
+                    if item_name in attack_toggle:
+                        attack_toggle[item_name](new_status)
                     break
 
-        elif request.POST.get('action') == 'whitelist':
-            mac_address = request.POST.get('whitelist_mac')
-            if mac_address and mac_address not in whitelist:
-                whitelist.append(mac_address)
-                with open("main/static/config/whitelist.txt",'a') as file:
-                    file.write(mac_address+'\n')
-
-        # Check if a MAC address was added to the blacklist
-        elif request.POST.get('action') == 'blacklist':
-            mac_address = request.POST.get('blacklist_mac')
-            if mac_address and mac_address not in blacklist:
-                blacklist.append(mac_address)
-
-        elif request.POST.get('remove_action') == 'remove_whitelist':
-            mac_address = request.POST.get('remove_whitelist_mac')
-            if mac_address in whitelist:
-                whitelist.remove(mac_address)
-                with open("main/static/config/whitelist.txt",'w') as file:
-                    file.writelines(whitelist)
-
-        # Handle removing from blacklist
-        elif request.POST.get('remove_action') == 'remove_blacklist':
-            mac_address = request.POST.get('remove_blacklist_mac')
-            if mac_address in blacklist:
-                blacklist.remove(mac_address)
-                with open("main/static/config/blacklist.txt",'w') as file:
-                    file.writelines(blacklist)
         #return render(request, 'main/settings.html', context)
         return redirect("settings")
     return render(request, 'main/settings.html', context)
 
 def attack_logs(request):
-    attack_types = ['evil twin', 'mitm', 'SSID confussion']  # Example attack types
-    selected_attack = request.GET.get('attack_type', 'SQL Injection')  # Default to 'SQL Injection'
+    attack_types = ['deauth', 'rogue_ap']  # Example attack types
+    selected_attack = request.GET.get('attack_type', 'deauth')  # Default to 'deauth'
     
     # Dummy log data for example purposes
     logs = {
-        'evil twin':  helper.get_log('main/static/logs/evil-twin.csv')
+        'deauth':  helper.get_log('main/static/logs/deauth.csv')
         ,
-        'mitm': helper.get_log('main/static/logs/mitm.csv'),
-        'SSID confussion': []
+        'rogue_ap': helper.get_log('main/static/logs/rogue_ap.csv'),
     }
+    #print(logs)
     context = {
         'attack_types': attack_types,
         'selected_attack': selected_attack,

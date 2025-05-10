@@ -1,0 +1,4 @@
+timestamp,SSID,BSSID,SignalStrength,Channel,SupportedRates
+1710001450,senthil,34:12:98:af:76:5b,-55,6,"1 2 5.5 11 18 24 36"
+1710001523,senthil,9a:45:7b:32:bc:11,-67,11,"6 12 24 48"
+1710001634,senthil,7c:21:5f:65:8a:4c,-72,9,"1 2 5.5 11"
